@@ -8,13 +8,21 @@ interface IModal {
   className?: string
   isOpen: boolean
   onClose: () => void
+  lazy?: boolean
 }
 
 export const Modal: FC<IModal> = (props) => {
-  const { children, className, isOpen, onClose } = props
+  const { children, className, isOpen, onClose, lazy } = props
 
   const [isClosing, setIsClosing] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout>>()
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsMounted(true)
+    }
+  }, [isOpen])
 
   const closeHandler = useCallback(() => {
     if (onClose) {
@@ -52,6 +60,10 @@ export const Modal: FC<IModal> = (props) => {
   const mods: Record<string, boolean> = {
     [cls.opened]: isOpen,
     [cls.isClosing]: isClosing
+  }
+
+  if (lazy && !isMounted) {
+    return null
   }
 
   return (
